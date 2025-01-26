@@ -1,39 +1,51 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider as NavigationThemeProvider,
+} from "@react-navigation/native";
+import { Stack } from "expo-router";
+import { useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { AppHeader } from "@/components";
+import config from "@/tamagui.config";
+import { TamaguiProvider } from "tamagui";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <TamaguiProvider config={config}>
+      <SafeAreaProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <NavigationThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <StatusBar
+              style={colorScheme === "dark" ? "light" : "dark"}
+              backgroundColor={colorScheme === "dark" ? "#1E1E1E" : "#FFFFFF"}
+            />
+            <AppHeader />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                gestureEnabled: true,
+                gestureDirection: "horizontal",
+                contentStyle: {
+                  backgroundColor:
+                    colorScheme === "dark" ? "#1E1E1E" : "#FFFFFF",
+                },
+              }}
+            >
+              <Stack.Screen
+                name="(homepage)"
+                options={{ headerShown: false }}
+              />
+            </Stack>
+          </NavigationThemeProvider>
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </TamaguiProvider>
   );
 }
