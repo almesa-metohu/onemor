@@ -1,16 +1,14 @@
-import { IRoutine, IWorkout } from "@/services";
-import { FlashList, ViewToken } from "@shopify/flash-list";
+import { getDifficultyLabel, IRoutine, IWorkout } from "@/services";
+import { FlashList } from "@shopify/flash-list";
+import moment from "moment";
+import { Clock } from "phosphor-react-native";
 import { FC, useCallback, useState } from "react";
 import { Dimensions, NativeScrollEvent } from "react-native";
-import {
-    Extrapolation,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring
-} from "react-native-reanimated";
-import { Image, Text, View, XStack, YStack } from "tamagui";
+import { useSharedValue, withSpring } from "react-native-reanimated";
+import { Text, View, XStack } from "tamagui";
 import { RoutineCard } from "./RoutineCard";
+import { WorkoutCardHeader } from "./WorkoutCardHeader";
+import { WorkoutCardFooter } from "./WorkoutCardFooter";
 
 interface WorkoutCardProps {
   workout: IWorkout;
@@ -18,26 +16,15 @@ interface WorkoutCardProps {
 
 export const WorkoutCard: FC<WorkoutCardProps> = ({
   workout: {
-    user: { profile_photo_url },
+    user: { profile_photo_url, id },
     routines,
-    description,
     name,
+    total_duration,
+    difficulty,
   },
 }) => {
   const [activeRoutineIndex, setActiveRoutineIndex] = useState(0);
   const { width } = Dimensions.get("window");
-
-  const [visibleItems, setVisibleItems] = useState<string[]>([]);
-
-  const onViewableItemsChanged = ({
-    viewableItems,
-  }: {
-    viewableItems: ViewToken[];
-  }) => {
-    console.log('viewableItems', viewableItems);
-    setVisibleItems(viewableItems.map((item) => item.item.id as string));
-    console.log('visibleItems', visibleItems);
-  };
 
   const scrollX = useSharedValue(0);
 
@@ -47,93 +34,55 @@ export const WorkoutCard: FC<WorkoutCardProps> = ({
     setActiveRoutineIndex(Math.round(offsetX / width));
   };
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: interpolate(
-            scrollX.value,
-            routines.map((_, i) => i * width * 0.8),
-            routines.map((_, i) => i * 20),
-            Extrapolation.CLAMP
-          ),
-        },
-      ],
-    };
-  });
-
   const renderRoutine = useCallback(
-    ({ item }: { item: IRoutine }) => {
-      console.log(visibleItems, item.id, visibleItems.includes(item.id.toString()));
+    ({ item, index }: { item: IRoutine, index: number }) => {
       return (
         <View width={width}>
           <RoutineCard
             key={item.id}
             routine={item}
-            isVisible={visibleItems.includes(item.id.toString())}
+            isVisible={activeRoutineIndex === index}
           />
         </View>
       );
     },
-    [visibleItems]
+    [activeRoutineIndex, routines, width]
   );
 
   return (
-    <View flex={1} aspectRatio={9 / 16} borderRadius={12} overflow="hidden">
-      <View position="absolute" top={0} left={0} right={0} zIndex={2}>
-        <XStack gap="$2" width={width * 0.9} style={animatedStyle} m={6}>
-          {routines.map((_, index) => (
-            <View
-              key={index}
-              backgroundColor={
-                index === activeRoutineIndex ? "white" : "$gray700"
-              }
-              flexGrow={1}
-              height={2}
-              borderRadius={1}
-              style={{ opacity: 0.8 }}
-            />
-          ))}
-        </XStack>
-
-        <XStack mt="$4" width={width * 0.8}>
-          <Image
-            source={{ uri: profile_photo_url }}
-            width={40}
-            height={40}
-            borderRadius={20}
-            backgroundColor="$gray8"
-          />
-          <YStack gap="$1">
-            <Text
-              color="white"
-              fontSize="$6"
-              fontWeight="bold"
-              textTransform="uppercase"
-            >
-              {name}
-            </Text>
-            <Text color="white">{routines[activeRoutineIndex]?.name}</Text>
-          </YStack>
-        </XStack>
-      </View>
+    <View flex={1} aspectRatio={3 / 4} borderRadius={12} overflow="hidden">
+      <WorkoutCardHeader
+        activeRoutineIndex={activeRoutineIndex}
+        name={name}
+        profile_photo_url={profile_photo_url}
+        routines={routines}
+        id={id}
+      />
       <FlashList
         data={routines}
+        extraData={activeRoutineIndex}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => `${item.id}`}
+        keyExtractor={(item) => item.id}
         renderItem={renderRoutine}
         snapToAlignment="start"
         snapToInterval={width}
         decelerationRate="fast"
-        onViewableItemsChanged={onViewableItemsChanged}
         maintainVisibleContentPosition={{
           minIndexForVisible: 0,
+        }}
+        viewabilityConfig={{
+          itemVisiblePercentThreshold: 50,
+          minimumViewTime: 300,
         }}
         onScroll={handleRoutineScroll}
         scrollEventThrottle={16}
         estimatedItemSize={width}
+      />
+      <WorkoutCardFooter
+        total_duration={total_duration}
+        difficulty={difficulty}
       />
     </View>
   );

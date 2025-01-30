@@ -1,9 +1,9 @@
 import { IRoutine } from "@/services";
+import { getAuthenticatedUrl } from "@/services/apiService";
 import { ResizeMode, Video } from "expo-av";
 import { FC, useEffect, useRef, useState } from "react";
-import { Dimensions, StyleSheet } from "react-native";
-import { View } from "tamagui";
-import { Image } from "expo-image";
+import { Dimensions } from "react-native";
+import { Spinner, View } from "tamagui";
 
 interface RoutineCardProps {
   routine: IRoutine;
@@ -19,7 +19,9 @@ export const RoutineCard: FC<RoutineCardProps> = ({ routine, isVisible }) => {
     if (isVisible && !isVideoLoaded) {
       videoRef.current?.loadAsync(
         { uri: routine.video.playlist_url },
-        { shouldPlay: true },
+        {
+          shouldPlay: true,
+        },
         true
       );
       setIsVideoLoaded(true);
@@ -33,25 +35,26 @@ export const RoutineCard: FC<RoutineCardProps> = ({ routine, isVisible }) => {
     };
   }, [isVisible]);
 
-
   return (
-    <View width={width} backgroundColor="black" aspectRatio={9 / 16}>
-      {isVisible && (
+    <View width={width} backgroundColor="black" aspectRatio={3/4}>
         <Video
           key={routine.id}
-          ref={videoRef}
-          source={{ uri: routine.video.playlist_url }}
-          resizeMode={ResizeMode.STRETCH}
+          // ref={videoRef}
+          source={{ uri: routine?.video?.playlist_url }}
+          resizeMode={ResizeMode.COVER}
           style={{
             width: "100%",
-            aspectRatio: 9 / 16,
+            aspectRatio: 3 / 4,
             backgroundColor: "black",
           }}
           shouldPlay={isVisible}
           isLooping
-          posterSource={{ uri: routine.video.thumbnail_url }}
+          usePoster
+          posterSource={getAuthenticatedUrl(routine?.video?.thumbnail_url)}
+          posterStyle={{
+            resizeMode: "cover",
+          }}
         />
-      )}
     </View>
   );
 };

@@ -23,8 +23,8 @@ export default function RootLayout() {
             value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
           >
             <StatusBar
-              style={colorScheme === "dark" ? "light" : "dark"}
-              backgroundColor={colorScheme === "dark" ? "#1E1E1E" : "#FFFFFF"}
+              style={colorScheme === "dark" ? "dark" : "light"}
+              backgroundColor={'#1E1E1E'}
             />
             <AppHeader />
             <Stack

@@ -2,10 +2,9 @@ import { IWorkout } from "@/services";
 import { fetchWorkoutFeed } from "@/services/apiService";
 import { FlashList } from "@shopify/flash-list";
 import { useEffect, useState } from "react";
-import { Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Spinner, View } from "tamagui";
 import { WorkoutCard } from "./components";
-import { View } from "tamagui";
 
 export const HomePageScreen = () => {
   const [workouts, setWorkouts] = useState<IWorkout[]>([]);
@@ -42,9 +41,9 @@ export const HomePageScreen = () => {
         renderItem={({ item }) => <WorkoutCard workout={item} />}
         onEndReached={loadWorkoutData}
         onEndReachedThreshold={0.5}
-        snapToAlignment="start"
         decelerationRate="fast"
         ItemSeparatorComponent={() => <View height={16} />}
+        ListFooterComponent={loading ? <Spinner color={"#c3fb33"} mt={'$6'} /> : null}
       />
     </SafeAreaView>
   );

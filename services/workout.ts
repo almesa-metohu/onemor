@@ -18,3 +18,16 @@ export interface IWorkout {
   user: IUser;
   video_cover: IVideo;
 }
+
+export function getDifficultyLabel(difficulty: number): string {
+  switch (difficulty) {
+    case 0:
+      return 'BEGINNER';
+    case 1:
+      return 'INTERMEDIATE';
+    case 2:
+      return 'ADVANCED';
+    default:
+      return 'UNKNOWN';
+  }
+}
