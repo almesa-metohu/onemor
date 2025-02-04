@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = "https://app.onemor.com/api";
-const AUTH_TOKEN = "1229|HA5ttrW9wpncj6K4gw0oWTziqKnsObc6hQQCJ1jg36ba5ca1";
+const AUTH_TOKEN = process.env.EXPO_PUBLIC_AUTH_TOKEN;
 
 export const API_CONFIG = {
   headers: {
